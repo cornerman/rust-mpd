@@ -420,11 +420,33 @@ impl<S: Read + Write> Client<S> {
     // TODO: list type [filtertype] [filterwhat] [...] [group] [grouptype] [...]
     // TODO: searchaddpl name type what [...], readcomments
 
-    /// Initiate query to songs database
-    pub fn query<'a>(&'a mut self) -> Query<'a, S> {
-        Query::new(self)
+    /// Find songs that match the given query and return results
+    pub fn find<'a>(&mut self, query: Query<'a>) -> Result<Vec<Song>> {
+        let cmd = query.to_string();
+
+        self.run_command_fmt(format_args!("{}", cmd))
+            .and_then(|_| {
+                self.read_pairs()
+                    .split("file")
+                    .map(|v| v.and_then(FromMap::from_map))
+                    .collect()
+            })
     }
-    // }}}
+
+    // TODO: searchadd/findadd/searchaddpl...what about findaddpl
+    // pub fn find_add<'a, N: ToPlaylistName>(&mut self, query: Query<'a>, playlist: N) -> Result<()> {
+    //     let args = query.to_string();
+    //     self.run_command_fmt(format_args!("searchaddpl {} {}", playlist.to_name(), args))
+    //         .and_then(|_| self.expect_ok())
+    // }
+
+    //TODO: additional grouping parameter, grouped resultset?
+    // pub fn list<'a>(&mut self, query: Query<'a>) -> Result<Vec<???>> {
+    // }
+
+    //TODO: additional grouping parameter, grouped resultset?
+    // pub fn count<'a>(&mut self, query: Query<'a>) -> Result<Vec<???>> {
+    // }
 
     // Output methods {{{
     /// List all outputs

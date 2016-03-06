@@ -2,13 +2,17 @@ extern crate mpd;
 
 mod helpers;
 use helpers::connect;
+use mpd::search::Query;
 
 #[test]
 fn search() {
     let mut mpd = connect();
-    let mut query = mpd.query();
-    //query.and(mpd::Term::Any, "Soul");
-    let songs = query.find(false, false);
+    let mut query = Query::new();
+    query.filter(mpd::Term::Any, "Soul");
+    query.limit(1);
+    query.window(1, 2);
+    query.fuzzy();
+    let songs = mpd.find(query);
     println!("{:?}", songs);
 }
 
